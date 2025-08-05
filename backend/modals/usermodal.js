@@ -25,7 +25,7 @@ const User = {
     },
     
     async create({name, email, password, role='user'}){
-        const result = await pool.querry(
+        const result = await pool.query(
             'INSERT INTO users (name,email,password,role) VALUES ($1,$2,$3,$4) RETURNING *'
             ,[name,email,password,role]
         );

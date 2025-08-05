@@ -1,4 +1,4 @@
-const rentalModel = require('../models/rentalModel');
+const rentalModel = require('../modals/rentalmodal');
 
 exports.createRental = async (req, res) => {
   const userId = req.user.id;

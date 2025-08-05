@@ -1,6 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import rentBookImage from '../assets/rentBook.png';
+import returnBookImage from '../assets/returnBook.png';
+
 // Main App component for the homepage
 export default function App() {
+    const navigate = useNavigate();
+
+    const handleNavigation = (path) => {
+        navigate(path);
+    };
+
     return (
         <div className="book-app-container">
             <style>
@@ -50,7 +60,9 @@ export default function App() {
                 }
                 @media (min-width: 768px) {
                     .card-grid {
-                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        max-width: 48rem;
+                        margin: 0 auto;
                     }
                 }
                 .card-container {
@@ -110,51 +122,45 @@ export default function App() {
             </style>
             <main className="main-content">
                 <div className="header-container">
-                    <h1 className="app-title">
-                        Book Rental App
-                    </h1>
+                    <h1 className="app-title">Book Rental App</h1>
                     <p className="app-description">
                         Choose an option below to manage your book rentals. Click on a card to get started.
                     </p>
-        
+
                     <div className="card-grid">
-                        
                         {/* Rent Book Card */}
                         <div className="card-container">
-                            <img src="http://googleusercontent.com/image_generation_content/2" alt="A person renting a book at a bookstore counter." className="card-image" />
+                            <img src={rentBookImage} alt="A person renting a book at a bookstore counter." className="card-image" />
                             <div className="card-overlay"></div>
                             <div className="card-content">
-                                <button type="button" className="card-button">
+                                <button 
+                                    type="button" 
+                                    className="card-button"
+                                    onClick={() => handleNavigation('/books')}
+                                >
                                     Rent Book
                                 </button>
                             </div>
                         </div>
-        
+
                         {/* Return Book Card */}
                         <div className="card-container">
-                            <img src="http://googleusercontent.com/image_generation_content/3" alt="A person returning a book at a library self-service kiosk." className="card-image" />
+                            <img src={returnBookImage} alt="A person returning a book at a library self-service kiosk." className="card-image" />
                             <div className="card-overlay"></div>
                             <div className="card-content">
-                                <button type="button" className="card-button">
+                                <button 
+                                    type="button" 
+                                    className="card-button"
+                                    onClick={() => handleNavigation('/rental')}
+                                >
                                     Return Book
                                 </button>
                             </div>
                         </div>
-        
-                        {/* View Rentals Card */}
-                        <div className="card-container">
-                            <img src="http://googleusercontent.com/image_generation_content/5" alt="A person viewing their book rentals on a tablet." className="card-image" />
-                            <div className="card-overlay"></div>
-                            <div className="card-content">
-                                <button type="button" className="card-button">
-                                    View Rentals
-                                </button>
-                            </div>
-                        </div>
-        
                     </div>
                 </div>
             </main>
         </div>
     );
 }
+      

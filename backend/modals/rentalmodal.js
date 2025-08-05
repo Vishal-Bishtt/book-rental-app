@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../db/db');
 
 const createRental = async (userId, bookId) => {
   const result = await pool.query(

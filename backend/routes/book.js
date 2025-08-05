@@ -7,8 +7,8 @@ const{
     deleteBook
 } = require('../controllers/bookcontroller');
 
-const authenticateToken = require('./auth/auth.controller'); // protect routes if needed
-const authorizationAdmin =require('./auth/auth.middleware');
+const authenticateToken = require('./auth/auth.middleware'); // protect routes if needed
+const authorizationAdmin =require('./auth/authorizeAdmin');
 const router = express.Router();
 
 router.get('/', getAllBooks);
@@ -17,4 +17,4 @@ router.post('/', authenticateToken,authorizationAdmin, createBook); // Only logg
 router.put('/:id', authenticateToken,authorizationAdmin, updateBook);
 router.delete('/:id', authenticateToken,authorizationAdmin, deleteBook);
 
-module.exports = router;
+module.exports = router; 

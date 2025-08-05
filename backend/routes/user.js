@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.get('/',authenticateToken, authorizationAdmin, getAllUsers);
 router.get('/:id',authenticateToken, getUserById);
-router.post('/', authenticateToken, createUser); // Only logged-in users
+router.post('/register', createUser); 
 router.put('/:id', authenticateToken, updateUser);
 router.delete('/:id', authenticateToken,authorizationAdmin, deleteUser);
 

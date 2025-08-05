@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const rentalController = require('../controllers/rentalcontroller');
-const authenticateToken = require('../middleware/authenticateToken');
-const authorizeAdmin = require('../middleware/authorizeAdmin');
+const authenticateToken = require('./auth/auth.middleware');
+const authorizeAdmin = require('./auth/authorizeAdmin');
 
 router.post('/', authenticateToken, rentalController.createRental);
 router.put('/:id/return', authenticateToken, rentalController.returnBook);

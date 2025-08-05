@@ -61,16 +61,12 @@ function App() {
             </AdminRoute>
           }
         />
-        <Route
-          path="/admin/rentals"
-          element={
-            <AdminRoute>
-              <AdminRentals />
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route path="books" element={<AdminBooks />} />
+          <Route path="rentals" element={<AdminRentals />} />
+        </Route>
       </Routes>
-    </Router>
+    </Router> 
   );
 }
 
