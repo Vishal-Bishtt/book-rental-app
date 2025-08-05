@@ -1,9 +1,12 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth} from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const AdminRoute = () => {
-  const { user } =  useAuth();
-  return user && user.role === 'admin' ? <Outlet /> : <Navigate to="/" />;
+const AdminRoute = ({ children }) => {
+  const { auth, loading } = useAuth();
+
+  if (loading) return null;
+
+  return auth?.user && auth.user.role === 'admin' ? children : <Navigate to="/" replace />;
 };
 
 export default AdminRoute;

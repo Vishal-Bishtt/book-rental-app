@@ -10,6 +10,7 @@ import Users from "./pages/Users";
 
 import AdminBooks from "./pages/Admin/Books";
 import AdminRentals from "./pages/Admin/Dashboard";
+import AdminUsers from "./pages/Admin/UsersSimple";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
@@ -54,6 +55,14 @@ function App() {
 
         {/* Admin-only Routes */}
         <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminRentals />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/admin/books"
           element={
             <AdminRoute>
@@ -61,10 +70,22 @@ function App() {
             </AdminRoute>
           }
         />
-        <Route path="/admin" element={<AdminRoute />}>
-          <Route path="books" element={<AdminBooks />} />
-          <Route path="rentals" element={<AdminRentals />} />
-        </Route>
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminRentals />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </Router> 
   );

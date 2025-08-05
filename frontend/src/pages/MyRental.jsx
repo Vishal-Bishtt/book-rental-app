@@ -9,6 +9,8 @@ const MyRentals = () => {
   const [returning, setReturning] = useState(null);
 
   const fetchRentals = useCallback(async () => {
+    if (!auth?.token) return;
+    
     try {
       const res = await axios.get("http://localhost:5000/api/rentals/my", {
         headers: {
@@ -22,13 +24,11 @@ const MyRentals = () => {
     } finally {
       setLoading(false);
     }
-  }, [auth.token]);
+  }, [auth?.token]);
 
   useEffect(() => {
-    if (auth.token) {
-      fetchRentals();
-    }
-  }, [auth.token, fetchRentals]);
+    fetchRentals();
+  }, [fetchRentals]);
 
   const handleReturn = async (rentalId) => {
     if (returning) return;

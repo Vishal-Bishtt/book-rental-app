@@ -23,6 +23,37 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
+    // Check if it's admin login from .env
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      const adminUser = {
+        id: 'admin',
+        email: process.env.ADMIN_EMAIL,
+        name: 'Administrator',
+        role: 'admin'
+      };
+
+      const token = jwt.sign({ 
+        id: adminUser.id, 
+        email: adminUser.email, 
+        role: adminUser.role 
+      }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      
+      // Set JWT in HTTP-only cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      return res.json({ 
+        token,
+        user: adminUser,
+        message: 'Admin login successful' 
+      });
+    }
+
+    // Regular user login
     const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (userResult.rows.length === 0) return res.status(404).json({ message: 'User not found' });
 

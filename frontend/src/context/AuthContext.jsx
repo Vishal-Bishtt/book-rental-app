@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import axios from "../api/axios";
 
 const AuthContext = createContext();
@@ -14,6 +14,8 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing authentication on app load
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuthStatus = async () => {
       try {
         // First check localStorage for quick restoration
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         // If we have stored data, use it temporarily
-        if (storedToken && storedUser && storedRole) {
+        if (storedToken && storedUser && storedRole && isMounted) {
           setAuth({
             user: storedUser,
             token: storedToken,
@@ -39,41 +41,26 @@ export const AuthProvider = ({ children }) => {
           });
         }
 
-        // Then verify with server (this will check both cookies and headers)
-        try {
-          const response = await axios.get('/auth/verify');
-          if (response.data.authenticated) {
-            const { user, token } = response.data;
-            setAuth({
-              user: user,
-              token: token,
-              role: user.role,
-            });
-            
-            // Update localStorage with fresh data
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", token);
-            localStorage.setItem("role", user.role);
-          }
-        } catch (error) {
-          // If verification fails, clear stored data
-          console.log("Token verification failed, clearing auth data");
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          setAuth({ user: null, token: null, role: null });
-        }
+        // Skip server verification for now to prevent loops
+        // We'll only verify on login, not on every app load
+        
       } catch (error) {
         console.error("Auth check failed:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     checkAuthStatus();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const login = (userData, token, role) => {
+  const login = useCallback((userData, token, role) => {
     if (!userData || !token) {
       console.error("Missing user data or token", { userData, token, role });
       return;
@@ -85,9 +72,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
     localStorage.setItem("role", userRole);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       // Call logout endpoint to clear server-side cookie
       await axios.post('/auth/logout');
@@ -100,10 +87,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-  };
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    auth,
+    login,
+    logout,
+    loading
+  }), [auth, login, logout, loading]);
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout, loading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

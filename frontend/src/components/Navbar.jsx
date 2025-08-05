@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link} from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import './Navbar.css'; // Import the CSS file
 
 const Navbar = () => {
   const { auth, logout, loading } = useAuth();
@@ -86,6 +85,22 @@ const Navbar = () => {
                 <>
                   <Link to="/books" className="nav-component__link">Books</Link>
                   <Link to="/rental" className="nav-component__link">My Rentals</Link>
+                  {auth.user.role === 'admin' && (
+                    <>
+                      <Link to="/admin/dashboard" className="nav-component__link" style={{color: '#dc3545 !important', fontWeight: '600 !important'}}>
+                        📊 Dashboard
+                      </Link>
+                      <Link to="/admin/books" className="nav-component__link" style={{color: '#dc3545 !important', fontWeight: '600 !important'}}>
+                        📚 Manage Books
+                      </Link>
+                      <Link to="/admin/users" className="nav-component__link" style={{color: '#dc3545 !important', fontWeight: '600 !important'}}>
+                        👥 Manage Users
+                      </Link>
+                    </>
+                  )}
+                  <span className="nav-component__link" style={{color: '#6c757d', fontSize: '0.9rem'}}>
+                    Welcome, {auth.user.name || auth.user.email}
+                  </span>
                   <button onClick={handleLogout} className="nav-component__button">
                     Logout
                   </button>

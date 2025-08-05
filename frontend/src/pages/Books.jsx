@@ -10,6 +10,8 @@ const BookList = () => {
 
   useEffect(() => {
     const fetchBooks = async () => {
+      if (!auth.token) return;
+      
       try {
         const res = await axios.get("http://localhost:5000/api/books", {
           headers: { Authorization: `Bearer ${auth.token}` },
@@ -22,8 +24,9 @@ const BookList = () => {
         setLoading(false);
       }
     };
+    
     fetchBooks();
-  }, [auth.token]);
+  }, [auth?.token]);
 
   const handleRent = async (bookId) => {
     if (renting) return;
@@ -31,7 +34,7 @@ const BookList = () => {
     setRenting(bookId);
     try {
       await axios.post(
-        "http://localhost:5000/api/rentals",
+        "http://localhost:5000/api/rentals", 
         { bookId },
         {
           headers: { Authorization: `Bearer ${auth.token}` },

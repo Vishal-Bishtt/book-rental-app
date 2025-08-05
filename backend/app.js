@@ -9,6 +9,7 @@ const authRoute = require('./routes/auth/auth.routes');
 const bookRoute = require('./routes/book');
 const userRoute = require('./routes/user');
 const rentalRoute = require('./routes/rental');
+const adminRoute = require('./routes/admin');
 
 const app = express();
 
@@ -25,5 +26,6 @@ app.use('/api/user',userRoute);
 app.use('/api/rental',rentalRoute);
 app.use('/api/rentals',rentalRoute); // Alternative route
 app.use('/api/returns', rentalRoute); // For return endpoints
+app.use('/api/admin', adminRoute); // Admin routes
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
