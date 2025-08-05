@@ -12,9 +12,35 @@ const Book = {
     },
     
     async update(id, data) {
+        const fields = [];
+        const values = [];
+        let paramCount = 1;
+        
+        if (data.title !== undefined) {
+            fields.push(`title = $${paramCount++}`);
+            values.push(data.title);
+        }
+        if (data.author !== undefined) {
+            fields.push(`author = $${paramCount++}`);
+            values.push(data.author);
+        }
+        if (data.genre !== undefined) {
+            fields.push(`genre = $${paramCount++}`);
+            values.push(data.genre);
+        }
+        if (data.is_available !== undefined) {
+            fields.push(`is_available = $${paramCount++}`);
+            values.push(data.is_available);
+        }
+        
+        if (fields.length === 0) {
+            throw new Error('No fields to update');
+        }
+        
+        values.push(id);
         const result = await pool.query(
-            'UPDATE books SET title = $1, author = $2, genre = $3 WHERE id = $4 RETURNING *',
-            [data.title, data.author, data.genre, id]
+            `UPDATE books SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+            values
         );
         return result.rows[0];
     },
@@ -24,9 +50,10 @@ const Book = {
         return result.rows[0];
     },
     
-    async create({title, author, genre = true}){
-        const result = await pool.querry(
-            'INSERT INTO books (title,author,genre) VALUES ($1,$2,$3)',[title,author,genre]
+    async create({title, author, genre}){
+        const result = await pool.query(
+            'INSERT INTO books (title, author, genre, is_available) VALUES ($1, $2, $3, $4) RETURNING *',
+            [title, author, genre, true]
         );
         return result.rows[0];
     },

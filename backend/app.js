@@ -23,5 +23,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/books',bookRoute);
 app.use('/api/user',userRoute);
 app.use('/api/rental',rentalRoute);
+app.use('/api/rentals',rentalRoute); // Alternative route
+app.use('/api/returns', rentalRoute); // For return endpoints
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

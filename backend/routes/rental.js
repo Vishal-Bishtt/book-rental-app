@@ -6,7 +6,8 @@ const authorizeAdmin = require('./auth/authorizeAdmin');
 
 router.post('/', authenticateToken, rentalController.createRental);
 router.put('/:id/return', authenticateToken, rentalController.returnBook);
-router.get('/me', authenticateToken, rentalController.getUserRentals);
+router.get('/my', authenticateToken, rentalController.getUserRentals);
+router.get('/me', authenticateToken, rentalController.getUserRentals); // Alternative endpoint
 router.get('/', authenticateToken, authorizeAdmin, rentalController.getAllRentals);
 router.delete('/:id', authenticateToken, authorizeAdmin, rentalController.deleteRental);
 
