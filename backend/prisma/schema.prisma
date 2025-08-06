@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String?
+  email      String   @unique
+  password   String?
+  role       UserRole @default(user)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  googleId   String?  @unique
+  rentals    Rental[]
+}
+
+model Book {
+  id           Int      @id @default(autoincrement())
+  title        String
+  author       String?
+  genre        String?
+  isbn         String?  @unique
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  rentals      Rental[]
+}
+
+model Rental {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  bookId      Int
+  rented_at   DateTime     @default(now())
+  returned_at DateTime?
+  due_date    DateTime     @default(dbgenerated("(CURRENT_TIMESTAMP + '14 days'::interval)"))
+  status      RentalStatus @default(active)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  book        Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, status])
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum RentalStatus {
+  active
+  returned
+  overdue
+}

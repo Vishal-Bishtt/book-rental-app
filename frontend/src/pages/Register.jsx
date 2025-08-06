@@ -5,11 +5,12 @@ import axios from "../api/axios";
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,12 +18,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     
     try { 
       await axios.post("/auth/register", formData); 
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +73,7 @@ const Register = () => {
             border-radius: 6px;
             font-size: 14px;
             margin-bottom: 16px;
+            box-sizing: border-box;
           }
           input:focus {
             outline: none;
@@ -88,6 +93,10 @@ const Register = () => {
           }
           button[type="submit"]:hover {
             background-color: #1a1a1a;
+          }
+          button[type="submit"]:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
           }
           .login-link {
             margin-top: 20px;
@@ -120,11 +129,12 @@ const Register = () => {
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="username">Username</label>
             <input
-              id="name"
-              name="name"
-              placeholder="Enter your name"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              value={formData.username}
               onChange={handleChange}
               required
             />
@@ -136,6 +146,7 @@ const Register = () => {
               name="email"
               type="email"
               placeholder="Enter your email"
+              value={formData.email}
               onChange={handleChange}
               required
             />
@@ -147,11 +158,14 @@ const Register = () => {
               name="password"
               type="password"
               placeholder="Enter your password"
+              value={formData.password}
               onChange={handleChange}
               required
             />
           </div>
-          <button type="submit">Sign Up</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Sign Up"}
+          </button>
         </form>
         <div className="login-link">
           Already have an account?

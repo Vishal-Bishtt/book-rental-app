@@ -1,35 +1,93 @@
-const pool = require('../db/db');
+const prisma = require('../prisma/client');
 
 const User = {
     async findAll() {
-        const result = await pool.query('SELECT * FROM users');
-        return result.rows;
+        return await prisma.user.findMany({
+            orderBy: {
+                created_at: 'desc'
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+                // Exclude password from results
+            }
+        });
     },
     
     async findById(id) {
-        const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-        return result.rows[0];
+        return await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+                // Exclude password from results
+            }
+        });
     },
     
     async update(id, data) {
-        const result = await pool.query(
-            'UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *',
-            [data.name, data.email, data.password, id]
-        );
-        return result.rows[0];
+        const updateData = {};
+        if (data.username !== undefined) updateData.username = data.username;
+        if (data.email !== undefined) updateData.email = data.email;
+        if (data.password !== undefined) updateData.password = data.password;
+        if (data.role !== undefined) updateData.role = data.role;
+        
+        return await prisma.user.update({
+            where: { id: parseInt(id) },
+            data: updateData,
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+                // Exclude password from results
+            }
+        });
     },
     
     async delete(id) {
-        const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
-        return result.rows[0];
+        return await prisma.user.delete({
+            where: { id: parseInt(id) },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+                // Exclude password from results
+            }
+        });
     },
     
-    async create({name, email, password, role='user'}){
-        const result = await pool.query(
-            'INSERT INTO users (name,email,password,role) VALUES ($1,$2,$3,$4) RETURNING *'
-            ,[name,email,password,role]
-        );
-        return result.rows[0];
+    async create({username, email, password, role='user'}){
+        return await prisma.user.create({
+            data: {
+                username,
+                email,
+                password,
+                role
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+                // Exclude password from results
+            }
+        });
     },
 };
 module.exports = User;

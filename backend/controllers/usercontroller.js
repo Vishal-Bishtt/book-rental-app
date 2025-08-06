@@ -22,9 +22,9 @@ exports.getUserById = async (req, res) => {
 };
  
 exports.createUser = async (req, res) => {
-  const { name, email, password, role='user' } = req.body;
+  const { username, email, password, role='user' } = req.body;
   try {
-    const newUser = await User.create({ name, email, password, role });
+    const newUser = await User.create({ username, email, password, role });
     res.status(201).json(newUser);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -32,9 +32,9 @@ exports.createUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { username, email, password } = req.body;
   try {
-    const updated = await User.update(req.params.id, { name, email, password });
+    const updated = await User.update(req.params.id, { username, email, password });
     if (!updated) return res.status(404).json({ message: 'User not found' });
     res.json(updated);
   } catch (err) {

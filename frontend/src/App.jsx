@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Books from "./pages/Books";
 import Rental from "./pages/MyRental";
 import Users from "./pages/Users";
+import AuthCallback from "./pages/AuthCallback";
 
 import AdminBooks from "./pages/Admin/Books";
 import AdminRentals from "./pages/Admin/Dashboard";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} /> 
         <Route path="/register" element={<Register />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Protected Routes (for logged-in users) */}
         <Route

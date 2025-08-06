@@ -1,89 +1,131 @@
-const pool = require('../db/db');
+const prisma = require('../prisma/client');
 
 const createRental = async (userId, bookId) => {
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    // Use Prisma transaction for atomic operations
+    const result = await prisma.$transaction(async (tx) => {
+      // Check if book is available
+      const book = await tx.book.findUnique({
+        where: { id: parseInt(bookId) },
+        select: { is_available: true }
+      });
+      
+      if (!book || !book.is_available) {
+        throw new Error('Book is not available for rental');
+      }
+      
+      // Create rental record
+      const rental = await tx.rental.create({
+        data: {
+          userId: parseInt(userId),
+          bookId: parseInt(bookId),
+          status: 'active'
+        }
+      });
+      
+      // Update book availability
+      await tx.book.update({
+        where: { id: parseInt(bookId) },
+        data: { is_available: false }
+      });
+      
+      return rental;
+    });
     
-    // Check if book is available
-    const bookCheck = await client.query('SELECT is_available FROM books WHERE id = $1', [bookId]);
-    if (!bookCheck.rows[0] || !bookCheck.rows[0].is_available) {
-      throw new Error('Book is not available for rental');
-    }
-    
-    // Create rental record
-    const rental = await client.query(
-      'INSERT INTO rentals (user_id, book_id, rented_at, status) VALUES ($1, $2, NOW(), $3) RETURNING *',
-      [userId, bookId, 'active']
-    );
-    
-    // Update book availability
-    await client.query('UPDATE books SET is_available = false WHERE id = $1', [bookId]);
-    
-    await client.query('COMMIT');
-    return rental.rows[0];
+    return result;
   } catch (err) {
-    await client.query('ROLLBACK');
     throw err;
-  } finally {
-    client.release();
   }
 };
 
 const returnBook = async (rentalId) => {
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    const result = await prisma.$transaction(async (tx) => {
+      // Get rental info
+      const rental = await tx.rental.findFirst({
+        where: { 
+          id: parseInt(rentalId),
+          status: 'active'
+        },
+        select: { bookId: true }
+      });
+      
+      if (!rental) {
+        throw new Error('Active rental not found');
+      }
+      
+      // Update rental record
+      const updatedRental = await tx.rental.update({
+        where: { id: parseInt(rentalId) },
+        data: {
+          returned_at: new Date(),
+          status: 'returned'
+        }
+      });
+      
+      // Update book availability
+      await tx.book.update({
+        where: { id: rental.bookId },
+        data: { is_available: true }
+      });
+      
+      return updatedRental;
+    });
     
-    // Get rental info
-    const rentalInfo = await client.query('SELECT book_id FROM rentals WHERE id = $1 AND status = $2', [rentalId, 'active']);
-    if (!rentalInfo.rows[0]) {
-      throw new Error('Active rental not found');
-    }
-    
-    // Update rental record
-    const rental = await client.query(
-      'UPDATE rentals SET returned_at = NOW(), status = $1 WHERE id = $2 RETURNING *',
-      ['returned', rentalId]
-    );
-    
-    // Update book availability
-    await client.query('UPDATE books SET is_available = true WHERE id = $1', [rentalInfo.rows[0].book_id]);
-    
-    await client.query('COMMIT');
-    return rental.rows[0];
+    return result;
   } catch (err) {
-    await client.query('ROLLBACK');
     throw err;
-  } finally {
-    client.release();
   }
 };
 
 const getAllRentals = async () => {
-  const result = await pool.query(`
-    SELECT r.*, b.title, b.author, b.genre, u.username 
-    FROM rentals r 
-    JOIN books b ON r.book_id = b.id 
-    JOIN users u ON r.user_id = u.id 
-    ORDER BY r.rented_at DESC
-  `);
-  return result.rows;
+  return await prisma.rental.findMany({
+    include: {
+      book: {
+        select: {
+          title: true,
+          author: true,
+          genre: true
+        }
+      },
+      user: {
+        select: {
+          username: true,
+          email: true
+        }
+      }
+    },
+    orderBy: {
+      rented_at: 'desc'
+    }
+  });
 };
 
 const getRentalByUserId = async (userId) => {
-  const result = await pool.query(`
-    SELECT r.*, b.title, b.author, b.genre 
-    FROM rentals r 
-    JOIN books b ON r.book_id = b.id 
-    WHERE r.user_id = $1 AND r.status = 'active'
-    ORDER BY r.rented_at DESC
-  `, [userId]);
-  return result.rows;
+  return await prisma.rental.findMany({
+    where: {
+      userId: parseInt(userId),
+      status: 'active'
+    },
+    include: {
+      book: {
+        select: {
+          title: true,
+          author: true,
+          genre: true
+        }
+      }
+    },
+    orderBy: {
+      rented_at: 'desc'
+    }
+  });
 };
 
 const deleteRental = async (id) => {
-  await pool.query('DELETE FROM rentals WHERE id = $1', [id]);
+  await prisma.rental.delete({
+    where: { id: parseInt(id) }
+  });
 };
 
 module.exports = {
