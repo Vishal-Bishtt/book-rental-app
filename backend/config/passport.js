@@ -47,7 +47,7 @@ passport.use(new GoogleStrategy({
         // If still no user found, create new user
         if (!user) {
             const userData = {
-                username: profile.displayName || 'Google User',
+                username: profile.displayName || profile.name?.givenName || profile.emails[0].value.split('@')[0],
                 email: email,
                 googleId: profile.id,
                 role: 'user'

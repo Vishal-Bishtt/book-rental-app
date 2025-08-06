@@ -79,10 +79,11 @@ const returnBook = async (rentalId) => {
 };
 
 const getAllRentals = async () => {
-  return await prisma.rental.findMany({
+  const rentals = await prisma.rental.findMany({
     include: {
       book: {
         select: {
+          id: true,
           title: true,
           author: true,
           genre: true
@@ -90,6 +91,7 @@ const getAllRentals = async () => {
       },
       user: {
         select: {
+          id: true,
           username: true,
           email: true
         }
@@ -99,10 +101,21 @@ const getAllRentals = async () => {
       rented_at: 'desc'
     }
   });
+
+  // Transform data to match expected format
+  return rentals.map(rental => ({
+    ...rental,
+    // Add legacy field mappings for backward compatibility
+    user_name: rental.user.username || rental.user.email,
+    user_email: rental.user.email,
+    book_title: rental.book.title,
+    book_author: rental.book.author,
+    book_genre: rental.book.genre
+  }));
 };
 
 const getRentalByUserId = async (userId) => {
-  return await prisma.rental.findMany({
+  const rentals = await prisma.rental.findMany({
     where: {
       userId: parseInt(userId),
       status: 'active'
@@ -110,6 +123,7 @@ const getRentalByUserId = async (userId) => {
     include: {
       book: {
         select: {
+          id: true,
           title: true,
           author: true,
           genre: true
@@ -120,6 +134,15 @@ const getRentalByUserId = async (userId) => {
       rented_at: 'desc'
     }
   });
+
+  // Transform data to match expected format
+  return rentals.map(rental => ({
+    ...rental,
+    // Add legacy field mappings for backward compatibility
+    book_title: rental.book.title,
+    book_author: rental.book.author,
+    book_genre: rental.book.genre
+  }));
 };
 
 const deleteRental = async (id) => {

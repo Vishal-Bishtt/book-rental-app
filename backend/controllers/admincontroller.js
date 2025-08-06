@@ -20,12 +20,14 @@ exports.getDashboardStats = async (req, res) => {
       include: {
         user: {
           select: {
+            id: true,
             username: true,
             email: true
           }
         },
         book: {
           select: {
+            id: true,
             title: true,
             author: true,
             genre: true
@@ -37,6 +39,20 @@ exports.getDashboardStats = async (req, res) => {
       }
     });
 
+    // Transform the data to match the expected format for frontend
+    const transformedRentals = rentalsWithDetails.map(rental => ({
+      id: rental.id,
+      rented_at: rental.rented_at,
+      returned_at: rental.returned_at,
+      due_date: rental.due_date,
+      status: rental.status,
+      user_name: rental.user.username || rental.user.email, // Fallback to email if no username
+      user_email: rental.user.email,
+      book_title: rental.book.title,
+      book_author: rental.book.author,
+      book_genre: rental.book.genre
+    }));
+
     res.json({
       stats: {
         totalUsers: userCount,
@@ -44,7 +60,7 @@ exports.getDashboardStats = async (req, res) => {
         activeRentals: activeRentals,
         totalRentals: totalRentals
       },
-      rentals: rentalsWithDetails
+      rentals: transformedRentals
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

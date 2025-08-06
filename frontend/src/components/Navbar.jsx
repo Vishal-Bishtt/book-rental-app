@@ -99,7 +99,7 @@ const Navbar = () => {
                     </>
                   )}
                   <span className="nav-component__link" style={{color: '#6c757d', fontSize: '0.9rem'}}>
-                    Welcome, {auth.user.name || auth.user.email}
+                    Welcome, {auth.user.username || auth.user.email}
                   </span>
                   <button onClick={handleLogout} className="nav-component__button">
                     Logout
